@@ -1,0 +1,13 @@
+
+*.sublime-project
+
+*.sublime-workspace
+
+.idea
+/*.iml
+*~
+/.vscode
+/build
+/dist
+/logs
+/*.log

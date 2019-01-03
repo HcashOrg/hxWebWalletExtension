@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>send transaction</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <link rel=stylesheet href=../html/css/base.css>
+    <link rel=stylesheet href=../html/css/ui-block.css>
+</head>
+
+<style>
+</style>
+
+<body>
+
+<h2 class="col">Test for ExtensionWallet</h2>
+<p></p>
+<div id=send class="container send" >
+<h3>1 Send transaction</h3>
+<p>1.1 Click this button to see which account is using in ExtensionWallet </p>
+    <div>
+        <button type="button" id="buttonGetACC" class="btn btn-block" >get account</button>
+    </div>
+<p id="accountAddress" style="color:#FF0000;font-size:12px;"> </p>
+
+<p>1.2 Input the receive account and amount of this transaction </p>
+    <div>
+        <label for="inputReceiveAddress">receive address: </label>
+        <input id="inputReceiveAddress"  size="35" >
+    </div>
+    <div>
+        <label for="inputAmount">amount in NAS: </label>
+        <input id="inputAmount"  size="10" >
+    </div>
+    <div>
+        <button type="button" id="buttonSendTx" class="btn btn-block" >send transaction</button>
+    </div>
+
+<h3>2 Call a smart contract</h3>
+<p>Input your smart contract address and parameters </p>
+    <div>
+        <label for="inputContractAddress">contract address: </label>
+        <input id="inputContractAddress" size="35" >
+    </div>
+    <div>
+        <label for="inputFunction">input function name:</label>
+        <input id="inputFunction" style="resize:both" >
+    </div>
+    <div>
+        <label for="inputParameter">input parameters:</label>
+        <input id="inputParameter" style="resize:both" >
+    </div>
+    <div>
+        <button type="button" id="buttonCallDapp" class="btn btn-block">call smart contract</button>
+    </div>
+    <p style="color:gray;font-size: 12px">The above button using "sendTransaction" rpc</p>
+    <div>
+        <button type="button" id="buttonCallTest" class="btn btn-block">call smart contract</button>
+    </div>
+    <p style="color:gray;font-size: 12px">The above button using "call" rpc</p>
+</div>
+<p id="txResult" style="color:#FF0000;font-size:12px;"></p>
+
+<script>
+
+    // document.addEventListener("DOMContentLoaded", function() {
+    //     console.log("web page loaded...")
+    //     setTimeout(checkNebpay,100);
+    //
+    // });
+    //
+    // var NebPay;
+    // function checkNebpay() {
+    //     console.log("check hxpay")
+    //     try{
+    //         NebPay = require("hxpay");
+    //     }catch(e){
+    //         alert ("Extension wallet is not installed, please install it first.")
+    //     }
+    // }
+
+    //check if webExtensionWallet is installed,
+    //var "webExtensionWallet" will be injected into webpage if webExtensionWallet is installed
+    if(typeof(webExtensionWallet) === "undefined"){
+        alert ("Extension wallet is not installed, please install it first.")
+    }
+
+    document.getElementById("buttonGetACC").addEventListener("click",function(){
+        console.log("********* get account *****************")
+        window.postMessage({
+            "target": "contentscript",
+            "data":{
+            },
+            "method": "getUserAddress",
+        }, "*");
+    })
+
+    document.getElementById("buttonSendTx").addEventListener("click",function()
+    {
+        console.log("********* send transaction *****************")
+        //var from = document.getElementById("inputAccountAddress").value
+        var to = document.getElementById("inputReceiveAddress").value
+        var amount = document.getElementById("inputAmount").value
+        window.postMessage({
+            "target": "contentscript",
+            "data":{
+                "to": to,
+                "value": amount
+            },
+            "method": "hx_sendTransaction"
+        }, "*");
+    });
+
+    document.getElementById("buttonCallDapp").addEventListener("click",function(){
+        console.log("********* call smart contract \"sendTransaction\" *****************")
+        var to = document.getElementById("inputContractAddress").value
+        var func = document.getElementById("inputFunction").value
+        var para = "[\"" + document.getElementById("inputParameter").value.trim() + "\"]"
+
+        window.postMessage({
+            "target": "contentscript",
+            "data":{
+                //"from": from,
+                "to": to,
+                "value": "0",
+                "contract":{
+                    "function":func,
+                    "args":para
+                }
+            },
+            "method": "hx_sendTransaction"
+        }, "*");
+    })
+
+    document.getElementById("buttonCallTest").addEventListener("click",function(){
+        console.log("********* call smart contract by \"call\" *****************")
+        var to = document.getElementById("inputContractAddress").value
+        var func = document.getElementById("inputFunction").value
+        var para = "[\"" + document.getElementById("inputParameter").value.trim() + "\"]"
+
+        window.postMessage({
+            "target": "contentscript",
+            "data":{
+                //"from": from,
+                "to": to,
+                "value": "0",
+                "contract":{
+                    "function":func,
+                    "args":para
+                }
+            },
+            "method": "hx_call"
+        }, "*");
+    })
+
+    // listen message from contentscript
+    window.addEventListener('message', function(e) {
+        // e.detail contains the transferred data (can
+        console.log("recived by page:" + e + ", e.data:"+ JSON.stringify(e.data));
+        if(!!e.data.data.account){
+            document.getElementById("accountAddress").innerHTML= "Account address: " + e.data.data.account;
+        }
+        if(!!e.data.data.txhash){
+            document.getElementById("txResult").innerHTML = "Transaction hash\n" +  JSON.stringify(e.data.data.txhash,null,'\t');
+        }
+        if(!!e.data.data.receipt){
+            document.getElementById("txResult").innerHTML = "Transaction Receipt\n" +  JSON.stringify(e.data.data.receipt,null,'\t');
+        }
+        if(!!e.data.data.hx_call){
+            document.getElementById("txResult").innerHTML = "return of call\n" +  JSON.stringify(e.data.data.hx_call,null,'\t');
+        }
+    });
+
+</script>
+
+</body>
+</html>

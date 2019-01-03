@@ -1,0 +1,3 @@
+[submodule "hxWebWallet"]
+	path = hxWebWallet
+	url = https://github.com/HcashOrg/hxWebWallet.git

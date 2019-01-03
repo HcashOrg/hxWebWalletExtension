@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "HxExtWallet",
+    "description": "HX链钱包插件"
+  },
+  "appDesc": {
+    "message": "用于HX链的交易发送和Dapp交互",
+    "description":"主要用于使用及与HX链的Dapp。可以用来发送交易，调用合约等。"
+  }
+}
