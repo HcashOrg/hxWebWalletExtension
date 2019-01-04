@@ -35,8 +35,10 @@ var _HxExtWallet = function () {
         // e.detail contains the transferred data (can
         if (e.data.src ==="content" && e.data.dst === "inpage" && !!e.data.data && !!e.data.data.account && e.data.data.source===sourceName) {
             userAddrerss = e.data.data.account;
+            var accountPubKey = e.data.data.accountPubKey;
+            var accountPubKeyString = e.data.data.accountPubKeyString
             if(typeof getUserAddressCallback === 'function'){
-                getUserAddressCallback(userAddrerss)
+                getUserAddressCallback({address: userAddrerss, pubKey: accountPubKey, pubKeyString: accountPubKeyString})
             }
         }
         if (e.data.src ==="content" && e.data.dst === "inpage" && !!e.data.data && !!e.data.data.config && e.data.data.source===sourceName) {

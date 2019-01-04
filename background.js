@@ -121,7 +121,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 port.postMessage({
                     source: sourceName,
                     account: AccAddress,
-                    accountPubKey: AccPubKey,
+                    accountPubKey: AccPubKey.toPublicKeyString(),
                     accountPubKeyString: AccPubKeyString
                 })
             }
@@ -272,14 +272,15 @@ function UnlockFile(keyJson, password) {
 
     try {
         var address;
-        let account = account_utils.NewAccount();
+        var account = account_utils.NewAccount();
         account.fromKey(keyJson, password);
         var address = account.getAddressString("HX");
         account.address = address;
         gAccount = account;
         AccAddress = address;
-        AccPubKey = account.getPublicKey();
-        AccPubKeyString = account.getPublicKeyString();
+        var pkey = PrivateKey.fromBuffer(account.getPrivateKey());
+        AccPubKey = pkey.toPublicKey();
+        AccPubKeyString = AccPubKey.toPublicKeyString();
 
     } catch (e) {
         // this catches e thrown by hx.js!account
