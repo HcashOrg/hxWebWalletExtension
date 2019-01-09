@@ -29,8 +29,8 @@ let { Apis, ChainConfig } = hx_js.bitshares_ws;
 var apiInstance;
 
 function resetHxNetwork() {
-    network = localSave.getItem("apiPrefix") || 'ws://localhost:8090';
-    chainId = localSave.getItem("chainId");
+    network = localSave.getItem("apiPrefix") || 'ws://211.159.168.197:6090';
+    chainId = localSave.getItem("chainId") || '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12';
 
     apiInstance = Apis.instance(network, true);
 }
@@ -171,7 +171,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 console.log("txhash: " + JSON.stringify(msg.data.txhash));
                 //if has serial number, then this message is send from hxpay,
                 if (msg.serialNumber) {
-                    forwardMsgToPage(msg.serialNumber, msg.data.txhash);
+                    forwardMsgToPage(msg.serialNumber, msg.data.txhash, null, 'txhash');
                     return
                 }
                 chrome.tabs.query({}, function (tabs) {       //send tx receipt back to web page
@@ -193,7 +193,7 @@ chrome.runtime.onConnect.addListener(function (port) {
             else if (!!msg.data.default) { //some message about this serial-number
                 console.log("txhash: " + JSON.stringify(msg.data.default));
                 if (msg.serialNumber) {
-                    forwardMsgToPage(msg.serialNumber, msg.data.default);
+                    forwardMsgToPage(msg.serialNumber, msg.data.default, msg.data.name);
                 }
             }
 
@@ -202,7 +202,7 @@ chrome.runtime.onConnect.addListener(function (port) {
 });
 
 //forward msg from popup-page to Dapp-page(Page ID has been recorded)
-function forwardMsgToPage(serialNumber, resp, err) {
+function forwardMsgToPage(serialNumber, resp, err, name) {
     var senderInfo = messagesFromPage[serialNumber];
     if (senderInfo) {
         chrome.tabs.sendMessage(senderInfo.sender.id,
@@ -211,7 +211,8 @@ function forwardMsgToPage(serialNumber, resp, err) {
                 "logo": "hx",
                 "serialNumber": serialNumber,
                 "resp": resp,
-                "error": err
+                "error": err,
+                "name": name
             });
 
         //delete messagesFromPage[serialNumber];
@@ -329,7 +330,7 @@ chrome.runtime.onMessage.addListener(
                         "logo": "hx",
                         "serialNumber": request.params.serialNumber,
                         "resp": resp,
-                        "error": err
+                        "error": err,
                     });
                 });
             } else if (type === "invokeContract") {

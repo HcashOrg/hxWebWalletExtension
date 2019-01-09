@@ -32,10 +32,8 @@ function messageToBackground(name, msg) {
     port.postMessage({
         src: "popup", dst: "background",
         serialNumber: txTobeProcessed.serialNumber || "",
-        data: data
-        // data: {
-        //     name : msg
-        // }
+        data: data,
+        name: name,
     });
 }
 
