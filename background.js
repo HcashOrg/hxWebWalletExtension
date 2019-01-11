@@ -29,7 +29,7 @@ let { Apis, ChainConfig } = hx_js.bitshares_ws;
 var apiInstance;
 
 function resetHxNetwork() {
-    network = localSave.getItem("apiPrefix") || 'ws://211.159.168.197:6090';
+    network = localSave.getItem("apiPrefix") || 'wss://nodeapi.hxlab.org:443'; // 'ws://211.159.168.197:6090';
     chainId = localSave.getItem("chainId") || '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12';
 
     apiInstance = Apis.instance(network, true);
