@@ -68,6 +68,9 @@ function rpc_call(data, type, cb) {
                     cb(null, err.message || err)
                 });
         } break;
+        case 'lockBalanceToCitizen': {
+            cb(null);
+        } break;
         default: {
             // 'invoke_contract' or default
             var contractId = data.to;
@@ -324,7 +327,23 @@ chrome.runtime.onMessage.addListener(
                 cacheTx({ data: txData }, 'invoke_contract');
 
                 rpc_call(txData, 'invoke_contract', function (resp, err) {
-                    forwardMsgToPage(request.params.serialNumber, resp, err)
+                    forwardMsgToPage(request.params.serialNumber, resp, err);
+                    sendResponse({
+                        "src": "background",
+                        "logo": "hx",
+                        "serialNumber": request.params.serialNumber,
+                        "resp": resp,
+                        "error": err,
+                    });
+                });
+            } else if(type==="lockBalanceToCitizen") {
+                var toCitizenIdOrName = request.params.pay.payload.citizen;
+                var assetId = request.params.pay.payload.assetId;
+                var amount = request.params.pay.payload.amount;
+                cacheTx({ data: txData }, 'locktocitizen=' + (toCitizenIdOrName||''));
+
+                rpc_call(txData, 'lockBalanceToCitizen', function (resp, err) {
+                    forwardMsgToPage(request.params.serialNumber, resp, err);
                     sendResponse({
                         "src": "background",
                         "logo": "hx",
