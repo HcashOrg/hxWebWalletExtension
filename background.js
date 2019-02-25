@@ -124,7 +124,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 port.postMessage({
                     source: sourceName,
                     account: AccAddress,
-                    accountPubKey: AccPubKey.toPublicKeyString(),
+                    accountPubKey: AccPubKey.toPublicKeyString("HX"),
                     accountPubKeyString: AccPubKeyString
                 })
             }
