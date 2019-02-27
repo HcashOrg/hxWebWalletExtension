@@ -236,10 +236,10 @@ function cacheTx(txData, pageType) {
 }
 
 function updateBadgeText() {
-    if (unapprovedTxs.length === 0)
-        chrome.browserAction.setBadgeText({ text: '' });
-    else
-        chrome.browserAction.setBadgeText({ text: unapprovedTxs.length.toString() });
+    // if (unapprovedTxs.length === 0)
+    //     chrome.browserAction.setBadgeText({ text: '' });
+    // else
+    //     chrome.browserAction.setBadgeText({ text: unapprovedTxs.length.toString() });
 }
 
 //initiallize: updateBadgeText()
