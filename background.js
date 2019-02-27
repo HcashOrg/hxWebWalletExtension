@@ -28,9 +28,16 @@ let { Apis, ChainConfig } = hx_js.bitshares_ws;
 
 var apiInstance;
 
-function resetHxNetwork() {
+function getNetworkConfig() {
     network = localSave.getItem("apiPrefix") || 'wss://nodeapi.hxlab.org'; // 'ws://211.159.168.197:6090';
     chainId = localSave.getItem("chainId") || '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12';
+    return {network: network, chainId: chainId};
+}
+
+function resetHxNetwork() {
+    let config = getNetworkConfig();
+    network = config.network;
+    chainId = config.chainId;
 
     apiInstance = Apis.instance(network, true);
 }
@@ -129,12 +136,10 @@ chrome.runtime.onConnect.addListener(function (port) {
                 })
             }
             else if (msg.data.method === 'getConfig') {
+                const config = getNetworkConfig();
                 port.postMessage({
                     source: sourceName,
-                    config: {
-                        network: network,
-                        chainId: chainId,
-                    },
+                    config: config,
                 })
             }
         }
