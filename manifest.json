@@ -1,9 +1,9 @@
 {
     "name": "HxExtWallet",
     "default_locale": "en",
-    "description": "The extension for HX chain",
+    "description": "The extension wallet for HX chain",
 
-    "version": "0.0.1",
+    "version": "0.0.3",
     "manifest_version": 2,
     
     "icons": {

@@ -31,7 +31,7 @@ var apiInstance;
 function getNetworkConfig() {
     network = localSave.getItem("apiPrefix") || 'wss://nodeapi.hxlab.org'; // 'ws://211.159.168.197:6090';
     chainId = localSave.getItem("chainId") || '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12';
-    return {network: network, chainId: chainId};
+    return { network: network, chainId: chainId };
 }
 
 function resetHxNetwork() {
@@ -76,6 +76,9 @@ function rpc_call(data, type, cb) {
                 });
         } break;
         case 'lockBalanceToCitizen': {
+            cb(null);
+        } break;
+        case 'sign_raw': {
             cb(null);
         } break;
         default: {
@@ -188,6 +191,18 @@ chrome.runtime.onConnect.addListener(function (port) {
                     }
                 });
 
+            }
+            else if(!!msg.data.sig) {
+                console.log("sig: " + msg.data.sig);
+                if (msg.serialNumber) {
+                    forwardMsgToPage(msg.serialNumber, msg.data.sig, null, 'sig');
+                    return
+                }
+                chrome.tabs.query({}, function (tabs) {       //send tx receipt back to web page
+                    for (var i = 0; i < tabs.length; ++i) {
+                        chrome.tabs.sendMessage(tabs[i].id, { txhash: msg.data.txhash });
+                    }
+                });
             }
             else if (!!msg.data.receipt) {
                 console.log("Receipt: " + JSON.stringify(msg.data.Receipt));
@@ -314,53 +329,104 @@ chrome.runtime.onMessage.addListener(
         if (request.logo === "hx") {
             messagesFromPage[request.params.serialNumber] = { sender: sender.tab, params: request.params };
 
-            var type = request.params.pay.payload.type;
-            var txData = {
-                "currency": request.params.pay.currency,
-                "to": request.params.pay.to,
-                "value": request.params.pay.value,
-                "valueRaw": request.params.pay.valueRaw,
-                "contractApi": request.params.pay.contractApi,
-                "contractArg": request.params.pay.contractArg,
-                "memo": request.params.pay.memo,
-                "gasPrice": request.params.pay.gasPrice,
-                "gasLimit": request.params.pay.gasLimit,
-                "serialNumber": request.params.serialNumber,
-                "callback": request.params.callback
-            };
-            if (type === "simulateCall") {       //
-                cacheTx({ data: txData }, 'invoke_contract');
+            // TODO: 非pay的处理
+            if (request.params.pay) {
+                var type = request.params.pay.payload.type;
+                var txData = {
+                    "currency": request.params.pay.currency,
+                    "to": request.params.pay.to,
+                    "value": request.params.pay.value,
+                    "valueRaw": request.params.pay.valueRaw,
+                    "contractApi": request.params.pay.contractApi,
+                    "contractArg": request.params.pay.contractArg,
+                    "memo": request.params.pay.memo,
+                    "gasPrice": request.params.pay.gasPrice,
+                    "gasLimit": request.params.pay.gasLimit,
+                    "serialNumber": request.params.serialNumber,
+                    "callback": request.params.callback
+                };
+                if (type === "simulateCall") {       //
+                    cacheTx({ data: txData }, 'invoke_contract');
 
-                rpc_call(txData, 'invoke_contract', function (resp, err) {
-                    forwardMsgToPage(request.params.serialNumber, resp, err);
-                    sendResponse({
-                        "src": "background",
-                        "logo": "hx",
-                        "serialNumber": request.params.serialNumber,
-                        "resp": resp,
-                        "error": err,
+                    rpc_call(txData, 'invoke_contract', function (resp, err) {
+                        forwardMsgToPage(request.params.serialNumber, resp, err);
+                        sendResponse({
+                            "src": "background",
+                            "logo": "hx",
+                            "serialNumber": request.params.serialNumber,
+                            "resp": resp,
+                            "error": err,
+                        });
                     });
-                });
-            } else if(type==="lockBalanceToCitizen") {
-                var toCitizenIdOrName = request.params.pay.payload.citizen;
-                var assetId = request.params.pay.payload.assetId;
-                var amount = request.params.pay.payload.amount;
-                cacheTx({ data: txData }, 'locktocitizen=' + (toCitizenIdOrName||''));
+                } else if (type === "lockBalanceToCitizen") {
+                    var toCitizenIdOrName = request.params.pay.payload.citizen;
+                    var assetId = request.params.pay.payload.assetId;
+                    var amount = request.params.pay.payload.amount;
+                    cacheTx({ data: txData }, 'locktocitizen=' + (toCitizenIdOrName || ''));
 
-                rpc_call(txData, 'lockBalanceToCitizen', function (resp, err) {
-                    forwardMsgToPage(request.params.serialNumber, resp, err);
-                    sendResponse({
-                        "src": "background",
-                        "logo": "hx",
-                        "serialNumber": request.params.serialNumber,
-                        "resp": resp,
-                        "error": err,
+                    rpc_call(txData, 'lockBalanceToCitizen', function (resp, err) {
+                        forwardMsgToPage(request.params.serialNumber, resp, err);
+                        sendResponse({
+                            "src": "background",
+                            "logo": "hx",
+                            "serialNumber": request.params.serialNumber,
+                            "resp": resp,
+                            "error": err,
+                        });
                     });
-                });
-            } else if (type === "invokeContract") {
-                cacheTx({ data: txData }, 'invoke_contract');
+                } else if (type === "invokeContract") {
+                    cacheTx({ data: txData }, 'invoke_contract');
 
-                rpc_call(txData, 'invoke_contract', function (resp, err) {
+                    rpc_call(txData, 'invoke_contract', function (resp, err) {
+                        forwardMsgToPage(request.params.serialNumber, resp, err);
+                        sendResponse({
+                            "src": "background",
+                            "logo": "hx",
+                            "serialNumber": request.params.serialNumber,
+                            "resp": resp,
+                            "error": err
+                        });
+                    });
+                } else if (type === "transferToContract") {
+                    cacheTx({ data: txData }, 'transfer_to_contract');
+                    rpc_call(txData, 'transfer_to_contract', function (resp, err) {
+                        forwardMsgToPage(request.params.serialNumber, resp, err);
+                        sendResponse({
+                            "src": "background",
+                            "logo": "hx",
+                            "serialNumber": request.params.serialNumber,
+                            "resp": resp,
+                            "error": err
+                        });
+                    });
+                } else if (type === "transfer") {
+                    cacheTx({ data: txData }, 'transfer');
+                    rpc_call(txData, 'transfer', function (resp, err) {
+                        forwardMsgToPage(request.params.serialNumber, resp, err);
+                        sendResponse({
+                            "src": "background",
+                            "logo": "hx",
+                            "serialNumber": request.params.serialNumber,
+                            "resp": resp,
+                            "error": err
+                        });
+                    });
+                } else if (type === "binary") {
+                    cacheTx({ data: txData });
+                } else {
+                    sendResponse({
+                        "serialNumber": request.params.serialNumber, "resp": "undefined interface"
+                    })
+                }
+            } else if(request.params.isSignBufferText && request.params.signBufferText) {
+                const signBufferText = request.params.signBufferText;
+                const rawData = {
+                    "rawData": signBufferText,
+                    "serialNumber": request.params.serialNumber,
+                    "callback": request.params.callback,
+                };
+                cacheTx({ data: rawData }, 'sign_raw');
+                rpc_call(rawData, 'sign_raw', function (resp, err) {
                     forwardMsgToPage(request.params.serialNumber, resp, err);
                     sendResponse({
                         "src": "background",
@@ -370,36 +436,6 @@ chrome.runtime.onMessage.addListener(
                         "error": err
                     });
                 });
-            } else if (type === "transferToContract") {
-                cacheTx({ data: txData }, 'transfer_to_contract');
-                rpc_call(txData, 'transfer_to_contract', function (resp, err) {
-                    forwardMsgToPage(request.params.serialNumber, resp, err);
-                    sendResponse({
-                        "src": "background",
-                        "logo": "hx",
-                        "serialNumber": request.params.serialNumber,
-                        "resp": resp,
-                        "error": err
-                    });
-                });
-            } else if (type === "transfer") {
-                cacheTx({ data: txData }, 'transfer');
-                rpc_call(txData, 'transfer', function (resp, err) {
-                    forwardMsgToPage(request.params.serialNumber, resp, err);
-                    sendResponse({
-                        "src": "background",
-                        "logo": "hx",
-                        "serialNumber": request.params.serialNumber,
-                        "resp": resp,
-                        "error": err
-                    });
-                });
-            } else if (type === "binary") {
-                cacheTx({ data: txData });
-            } else {
-                sendResponse({
-                    "serialNumber": request.params.serialNumber, "resp": "undefined interface"
-                })
             }
         }
 

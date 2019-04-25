@@ -15,7 +15,7 @@ var _HxExtWallet = function () {
             "data":{},
             "method": "getUserAddress",
         }, "*");
-    }
+    };
 
     this.getConfigCallback ;
 
@@ -26,7 +26,8 @@ var _HxExtWallet = function () {
             "data":{},
             "method": "getConfig",
         }, "*");
-    }
+    };
+
 
     var sourceName = 'HxExtWallet';
 
