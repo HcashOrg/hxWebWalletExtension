@@ -131,10 +131,17 @@ chrome.runtime.onConnect.addListener(function (port) {
                 })
             }
             else if (msg.data.method === "getUserAddress") {
+                const config = getNetworkConfig();
+                const testnetChainId = "2c5729a8f02e0431233528a3db625a7b0f83aa7c9f561d9bd73886d993a57161";
+                const addrPrefix = config.chainId === testnetChainId ? 'HXT' : 'HX';
+                let curAddr = AccAddress;
+                if(curAddr.substr(0, 3) !== 'HXT' && addrPrefix === 'HXT') {
+                    curAddr = addrPrefix + curAddr.substr(2);
+                }
                 port.postMessage({
                     source: sourceName,
-                    account: AccAddress,
-                    accountPubKey: AccPubKey.toPublicKeyString("HX"),
+                    account: curAddr,
+                    accountPubKey: AccPubKey.toPublicKeyString(addrPrefix),
                     accountPubKeyString: AccPubKeyString
                 })
             }
