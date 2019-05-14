@@ -28,6 +28,35 @@ let { Apis, ChainConfig } = hx_js.bitshares_ws;
 
 var apiInstance;
 
+const networkList = [
+    {
+        chainId: '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12', key: 'mainnet', name: "Mainnet",
+        // url: "ws://211.159.168.197:6090"
+        url: "wss://nodeapi.hxlab.org:443"
+        // url: "ws://localhost:8090"
+    },
+    { chainId: '9f3b24c962226c1cb775144e73ba7bb177f9ed0b72fac69cd38764093ab530bd', key: 'testnet', name: "Testnet", url: "ws://47.74.44.110:8090" },
+    {
+        //  chainId: 'fe70279c1d9850d4ddb6ca1f00c577bc2e86bf33d54fafd4c606a6937b89ae32', // local testnet
+        chainId: '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12', // local mainnet
+        key: 'localhost', name: "localhost:8090", url: "ws://localhost:8090"
+    },
+    {
+        chainId: '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12', key: 'indicator', name: "Indicator",
+        url: "ws://localhost:50320"
+    },
+    {
+        chainId: '2c5729a8f02e0431233528a3db625a7b0f83aa7c9f561d9bd73886d993a57161', key: 'regtest', name: "Regtest",
+        url: "ws://localhost:60320",
+        address_prefix: "HXT",
+    },
+    {
+        chainId: '2c5729a8f02e0431233528a3db625a7b0f83aa7c9f561d9bd73886d993a57161', key: 'regtest121', name: "Regtest121",
+        url: "ws://192.168.1.121:30000",
+        address_prefix: "HXT",
+    },
+];
+
 function getNetworkConfig() {
     network = localSave.getItem("apiPrefix") || 'wss://nodeapi.hxlab.org'; // 'ws://211.159.168.197:6090';
     chainId = localSave.getItem("chainId") || '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12';
@@ -135,7 +164,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 const testnetChainId = "2c5729a8f02e0431233528a3db625a7b0f83aa7c9f561d9bd73886d993a57161";
                 const addrPrefix = config.chainId === testnetChainId ? 'HXT' : 'HX';
                 let curAddr = AccAddress;
-                if(curAddr.substr(0, 3) !== 'HXT' && addrPrefix === 'HXT') {
+                if (curAddr.substr(0, 3) !== 'HXT' && addrPrefix === 'HXT') {
                     curAddr = addrPrefix + curAddr.substr(2);
                 }
                 port.postMessage({
@@ -150,6 +179,30 @@ chrome.runtime.onConnect.addListener(function (port) {
                 port.postMessage({
                     source: sourceName,
                     config: config,
+                })
+            }
+            else if (msg.data.method === 'setConfig') {
+                // 修改当前钱包的网络配置
+                const targetChainId = msg.data.data.chainId;
+                const targetNetworkKey = msg.data.data.networkKey;
+                console.log(msg.data);
+                let networkObj = null;
+                for (const item of networkList) {
+                    if (item.key === targetNetworkKey) {
+                        networkObj = item;
+                        break;
+                    }
+                }
+                if (networkObj) {
+                    const chainRpcUrl = networkObj.url;
+                    localSave.setItem("networkKey", networkObj.key);
+                    localSave.setItem("apiPrefix", chainRpcUrl);
+                    localSave.setItem("chainId", networkObj.chainId);
+                }
+
+                port.postMessage({
+                    source: sourceName,
+                    setConfigCallback: true,
                 })
             }
         }
@@ -199,7 +252,7 @@ chrome.runtime.onConnect.addListener(function (port) {
                 });
 
             }
-            else if(!!msg.data.sig) {
+            else if (!!msg.data.sig) {
                 console.log("sig: " + msg.data.sig);
                 if (msg.serialNumber) {
                     forwardMsgToPage(msg.serialNumber, msg.data.sig, null, 'sig');
@@ -425,7 +478,7 @@ chrome.runtime.onMessage.addListener(
                         "serialNumber": request.params.serialNumber, "resp": "undefined interface"
                     })
                 }
-            } else if(request.params.isSignBufferText && request.params.signBufferText) {
+            } else if (request.params.isSignBufferText && request.params.signBufferText) {
                 const signBufferText = request.params.signBufferText;
                 const rawData = {
                     "rawData": signBufferText,
