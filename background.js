@@ -55,6 +55,13 @@ const networkList = [
         url: "ws://192.168.1.121:30000",
         address_prefix: "HXT",
     },
+    {
+        chainId: '22f71d13b03b4e83918957fddb4d1441513e830a885936def665fddc77a85ee8', key: 'testnet2',
+        name: 'Testnet2', url: "ws://192.168.1.121:60038",
+    },
+    {
+        chainId: '08d1d10092bbdbb68c1613c93ded434805381fe73e845c59b5a97693fa1a778e', key: 'dexTestnet', name: 'DexTestnet', url: 'ws://192.168.1.122:10055',
+    },
 ];
 
 function getNetworkConfig() {
@@ -185,6 +192,8 @@ chrome.runtime.onConnect.addListener(function (port) {
                 // 修改当前钱包的网络配置
                 const targetChainId = msg.data.data.chainId;
                 const targetNetworkKey = msg.data.data.networkKey;
+                const targetNetwork = msg.data.data.network;
+                const targetClientNetwork = msg.data.data.clientNetwork;
                 console.log(msg.data);
                 let networkObj = null;
                 for (const item of networkList) {

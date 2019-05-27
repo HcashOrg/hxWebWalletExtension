@@ -39,5 +39,5 @@
   "web_accessible_resources": ["inpage.js"],
 
     "options_page": "options.html",
-    "homepage_url": "http://yourdomainhere.com/"
+    "homepage_url": "http://wallet.hx.cash/"
 }
