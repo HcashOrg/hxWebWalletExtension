@@ -75,7 +75,11 @@ function resetHxNetwork() {
     network = config.network;
     chainId = config.chainId;
 
-    apiInstance = Apis.instance(network, true);
+    try {
+        apiInstance = Apis.instance(network, true);
+    } catch(e) {
+        console.log("instance apis network error", e);
+    }
 }
 
 
