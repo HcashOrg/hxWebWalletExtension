@@ -3,7 +3,7 @@
     "default_locale": "en",
     "description": "The extension wallet for HX chain",
 
-    "version": "0.0.3",
+    "version": "0.0.4",
     "manifest_version": 2,
     
     "icons": {

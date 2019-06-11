@@ -237,7 +237,8 @@ chrome.runtime.onConnect.addListener(function (port) {
                 port.postMessage({
                     source: sourceName,
                     unapprovedTxs: unapprovedTxs
-                })
+                });
+                unapprovedTxs.pop();
             }
             else if (!!msg.data.rejectAll) {
                 unapprovedTxs.splice(0, unapprovedTxs.length);
@@ -398,7 +399,6 @@ chrome.runtime.onMessage.addListener(
         if (request.logo === "hx") {
             messagesFromPage[request.params.serialNumber] = { sender: sender.tab, params: request.params };
 
-            // TODO: 非pay的处理
             if (request.params.pay) {
                 var type = request.params.pay.payload.type;
                 var txData = {
