@@ -32,8 +32,8 @@ const networkList = [
     {
         chainId: '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12', key: 'mainnet', name: "Mainnet",
         // url: "ws://211.159.168.197:6090"
-        url: "wss://nodeapi.hxlab.org:443"
-        // url: "ws://localhost:8090"
+        // url: "wss://nodeapi.hxlab.org:443"
+        url: "ws://nodeapi.hxlab.org:6090"
     },
     { chainId: '9f3b24c962226c1cb775144e73ba7bb177f9ed0b72fac69cd38764093ab530bd', key: 'testnet', name: "Testnet", url: "ws://47.74.44.110:8090" },
     {
@@ -56,6 +56,11 @@ const networkList = [
         address_prefix: "HXT",
     },
     {
+        chainId: '2c5729a8f02e0431233528a3db625a7b0f83aa7c9f561d9bd73886d993a57161', key: 'regtest121b', name: "Regtest121",
+        url: "ws://192.168.1.121:30002",
+        address_prefix: "HXT",
+    },
+    {
         chainId: '22f71d13b03b4e83918957fddb4d1441513e830a885936def665fddc77a85ee8', key: 'testnet2',
         name: 'Testnet2', url: "ws://192.168.1.121:60038",
     },
@@ -65,7 +70,7 @@ const networkList = [
 ];
 
 function getNetworkConfig() {
-    network = localSave.getItem("apiPrefix") || 'wss://nodeapi.hxlab.org'; // 'ws://211.159.168.197:6090';
+    network = localSave.getItem("apiPrefix") || 'ws://nodeapi.hxlab.org:6090'; // 'ws://211.159.168.197:6090';
     chainId = localSave.getItem("chainId") || '2e13ba07b457f2e284dcfcbd3d4a3e4d78a6ed89a61006cdb7fdad6d67ef0b12';
     return { network: network, chainId: chainId };
 }
