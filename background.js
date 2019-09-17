@@ -67,6 +67,9 @@ const networkList = [
     {
         chainId: '08d1d10092bbdbb68c1613c93ded434805381fe73e845c59b5a97693fa1a778e', key: 'dexTestnet', name: 'DexTestnet', url: 'ws://192.168.1.122:10055',
     },
+    {
+        chainId: '08d1d10092bbdbb68c1613c93ded434805381fe73e845c59b5a97693fa1a778e', key: 'hdaoTestnet', name: 'HdaoTestnet', url: 'ws://114.67.86.57:60038',
+    },
 ];
 
 function getNetworkConfig() {
