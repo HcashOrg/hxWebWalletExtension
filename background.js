@@ -78,6 +78,71 @@ function getNetworkConfig() {
     return { network: network, chainId: chainId };
 }
 
+
+mergeNetworkListWithLocalNetwork();
+
+function setStorage(key, value) {
+    if (typeof localStorage !== "undefined") {
+        try {
+            return localStorage.setItem(key, value);
+        } catch (e) {
+
+        }
+    }
+}
+
+function getStorage(key) {
+    if (typeof localStorage !== "undefined") {
+        try {
+            return localStorage.getItem(key);
+        } catch (e) {
+
+        }
+    }
+}
+
+function setLocalNetwork(url, chainId) {
+    setStorage("local_network", JSON.stringify({
+        chainId: chainId,
+        key: 'local',
+        name: 'Local',
+        url: url
+    }));
+}
+
+function getLocalNetwork() {
+    const info = getStorage("local_network");
+    if (!info) {
+        return null;
+    }
+    try {
+        return JSON.parse(info);
+    } catch (e) {
+        return null;
+    }
+}
+
+function mergeNetworkListWithLocalNetwork() {
+    const network = getLocalNetwork();
+    if (!network) {
+        return networkList;
+    }
+    let found = false;
+    for (let item of networkList) {
+        if (item.key === network.key && item.url !== network.url) {
+            item.url = network.url;
+            item.chainId = network.chainId;
+            item.name = network.name;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        networkList.push(network);
+    }
+    return networkList;
+}
+
 function resetHxNetwork() {
     let config = getNetworkConfig();
     network = config.network;
@@ -85,7 +150,7 @@ function resetHxNetwork() {
 
     try {
         apiInstance = Apis.instance(network, true);
-    } catch(e) {
+    } catch (e) {
         console.log("instance apis network error", e);
     }
 }
