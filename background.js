@@ -149,6 +149,7 @@ function resetHxNetwork() {
     chainId = config.chainId;
 
     try {
+        Apis.setAutoReconnect(true);
         apiInstance = Apis.instance(network, true);
     } catch (e) {
         console.log("instance apis network error", e);
