@@ -10,4 +10,5 @@
 /build
 /dist
 /logs
+/node_modules
 /*.log
